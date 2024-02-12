@@ -24,7 +24,7 @@
     <ProjectGuid>{8c750ef5-d7dd-4112-9fb5-bf15a592c621}</ProjectGuid>
     <RootNamespace>NROSAOMessageLogger</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>TouhouMystiaIzakayaHook</ProjectName>
+    <ProjectName>TMIAchievementActivator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
