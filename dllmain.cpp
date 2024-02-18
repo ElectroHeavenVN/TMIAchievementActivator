@@ -13,12 +13,11 @@
 #include <complex>
 #include "il2cpp.h"
 #include <codecvt>
+#include "pch.h"
+#include "wrapper.hpp"
 
 uintptr_t gameAssemblyHandle = (uintptr_t)GetModuleHandle("GameAssembly.dll");
-
-uintptr_t GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_offset = gameAssemblyHandle + 0x535000;
-uintptr_t System_String__CreateString_offset = gameAssemblyHandle + 0x1CE6B30;
-uintptr_t GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement_534BF0_offset = gameAssemblyHandle + 0x534BF0;
+void(__stdcall* GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement)(System_String_o* achievementId, const MethodInfo* method) = nullptr;
 
 #pragma region Utils
 std::string utf16_to_utf8(const uint16_t* utf16String, size_t length)
@@ -52,7 +51,7 @@ wchar_t* ConvertCharToWchar(const char* charString)
 void logDebug(const char* format...)
 {
     printf(format);
-    printf("\r\n");
+    printf("\n");
 }
 
 void logDebugStd(std::string str)
@@ -64,44 +63,53 @@ void logDebug(System_String_o* str)
 {
     logDebugStd(GetStdStr(str));
 }
- 
-System_String_o* CreateNetString(const wchar_t* str)    //string.CreateString(char* value)
-{
-    System_String_o* (__stdcall *String__CreateString)(void* instance, const wchar_t* str) = (System_String_o * (*)(void*, const wchar_t*))System_String__CreateString_offset;
-    auto* managed_str = static_cast<System_String_o*>(malloc(sizeof(System_String_o)));
-    return String__CreateString(managed_str, str);
-}
 #pragma endregion
 
 #pragma region Hook
-void (__stdcall *GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_original)(GameData_Profile_AchievementData_array* allAchievements, const MethodInfo* method);
-void __stdcall GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_hook(GameData_Profile_AchievementData_array* allAchievements, const MethodInfo* method)
+void (__stdcall *GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_original)(GameData_Profile_AchievementData_array* allAchievements, const MethodInfo* method);
+void __stdcall GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_hook(GameData_Profile_AchievementData_array* allAchievements, const MethodInfo* method)
 {
-    GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_original(allAchievements, method);
+    GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_original(allAchievements, method);
     for (int i = 0; i < allAchievements->max_length; i++)
     {
-        logDebugStd("Achievement ID: " + GetStdStr(allAchievements->m_Items[i].fields.Id) + ", activating...\r\n");
-        void(__stdcall * GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement_534BF0)(System_String_o * achievementId, const MethodInfo * method) = (void (*)(System_String_o*, const MethodInfo*))GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement_534BF0_offset;
-        GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement_534BF0(allAchievements->m_Items[i].fields.Id, 0);
+        logDebugStd("Achievement ID: " + GetStdStr(allAchievements->m_Items[i].fields.Id) + ", activating...\n");
+        GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement(allAchievements->m_Items[i].fields.Id, 0);
     }
-}
-
-void setupHook()
-{
-    MH_CreateHook(reinterpret_cast<LPVOID*>(GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_offset), &GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_hook, (LPVOID*)&GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_535000_original);
-    MH_EnableHook(MH_ALL_HOOKS);
+    logDebug("You can close this console window now.");
+    SetConsoleTitleA("TMIAchievementActivator");
+    FreeConsole();
 }
 #pragma endregion
 
 void Main()
 {
+    FILE* output = nullptr;
+    if (!AllocConsole())
+        return;
+    SetConsoleTitleA("TMIAchievementActivator - Do not close");
+    freopen_s(&output, "CONOUT$", "w", stdout);
     MH_Initialize();
-    AllocConsole();
-    freopen("CONIN$", "r", stdin);
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-    printf("Module loaded!\r\n");
-    setupHook();
+    Il2cpp::initialize();
+    const auto il2cppImages = std::make_unique<Wrapper>();
+    const auto assemblyCSharp = il2cppImages->get_image("Assembly-CSharp.dll");
+    const auto dbAchievement = assemblyCSharp->get_class("DataBaseAchievement", "GameData.RunTime.Common.AchievementSystem");
+    const auto initialize = dbAchievement->get_method("Initialize", 1);
+    if (initialize == nullptr)
+    {
+        logDebug("[TMIAchievementActivator] Initialize method not found!");
+        return;
+    }
+    const auto finishAchievement = dbAchievement->get_method("FinishAchievement", 1);
+    if (finishAchievement == nullptr)
+    {
+        logDebug("[TMIAchievementActivator] FinishAchievement method not found!");
+        return;
+    }
+    if (MH_OK == MH_CreateHook(initialize->methodPointer, &GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_hook, (LPVOID*)&GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__Initialize_original) && MH_OK == MH_EnableHook(MH_ALL_HOOKS))
+        logDebug("[TMIAchievementActivator] Hook successfully!");
+    else 
+        logDebug("[TMIAchievementActivator] Hook failed!");
+    GameData_RunTime_Common_AchievementSystem_DataBaseAchievement__FinishAchievement = (void (*)(System_String_o*, const MethodInfo*))finishAchievement->methodPointer;
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved )
@@ -113,6 +121,8 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
             break;
         case DLL_PROCESS_DETACH:
             MH_Uninitialize();
+            FreeConsole();
+            FreeLibraryAndExitThread(hModule, 0);
             break;
         case DLL_THREAD_ATTACH:
         case DLL_THREAD_DETACH:
@@ -120,4 +130,3 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
     }
     return TRUE;
 }
-

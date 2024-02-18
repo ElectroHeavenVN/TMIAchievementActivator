@@ -174,10 +174,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="api.hpp" />
+    <ClInclude Include="class.hpp" />
+    <ClInclude Include="field.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="il2cpp.h" />
-    <ClInclude Include="Message.h" />
+    <ClInclude Include="image.hpp" />
+    <ClInclude Include="include\MinHook.h" />
+    <ClInclude Include="method.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="table_defs.h" />
+    <ClInclude Include="type.hpp" />
+    <ClInclude Include="wrapper.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

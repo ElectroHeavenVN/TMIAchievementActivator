@@ -222,4 +222,24 @@ struct GameData_Profile_AchievementData_array {
     il2cpp_array_size_t max_length;
     GameData_Profile_AchievementData_o m_Items[65535];
 };
+typedef struct Il2CppGenericInst
+{
+    uint32_t type_argc;
+    const Il2CppType** type_argv;
+} Il2CppGenericInst;
+typedef struct Il2CppGenericContext
+{
+    /* The instantiation corresponding to the class generic parameters */
+    const Il2CppGenericInst* class_inst;
+    /* The instantiation corresponding to the method generic parameters */
+    const Il2CppGenericInst* method_inst;
+} Il2CppGenericContext;
+typedef struct Il2CppGenericMethod
+{
+    const MethodInfo* methodDefinition;
+    Il2CppGenericContext context;
+} Il2CppGenericMethod;
+typedef const struct ___Il2CppMetadataMethodHandle* Il2CppMetadataMethodDefinitionHandle;
+typedef const struct ___Il2CppMetadataGenericContainerHandle* Il2CppMetadataGenericContainerHandle;
+
 #endif
