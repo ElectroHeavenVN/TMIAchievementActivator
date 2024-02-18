@@ -1,6 +1,6 @@
 # TMIAchievementActivator
 A simple and lazy way to get all Steam achievements from Touhou Mystia's Izakaya.
-Only works with `v3.3.4i`.
+Works with any game version.
 ## How to use
 - Copy [MinHook](bin) [x86](bin/MinHook.x86.dll) or [x64](MinHook.x64.dll) to the game folder, acording to game's bitness.
 - Install and open [ProcessHacker](https://processhacker.sourceforge.io/).
